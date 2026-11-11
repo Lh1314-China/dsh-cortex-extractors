@@ -1,15 +1,45 @@
+import path from 'node:path';
+import { createRequire } from 'node:module';
 import { runExtractor } from './lib/extractor.js';
 
 export const name = 'cortex-extractors';
 export const inject = ['tools'];
 
-let Schema = null;
-try {
-  const mod = await import('@deepseek-ai/schemastery');
-  Schema = mod.default ?? mod;
-} catch {
-  Schema = null;
+/**
+ * Resolve `@deepseek-ai/schemastery`.
+ *
+ * A plugin installed as a link (or otherwise living outside the running
+ * profile's node_modules) cannot resolve the harness' own packages from its
+ * own location. Without a fallback the old code exported `Config = null`,
+ * which crashed the host at startup: `settings.describe()` evaluates
+ * `"toJSON" in schema`, and `null` throws
+ * `TypeError: Cannot use 'in' operator to search for 'toJSON' in null`.
+ * That failure surfaces as `desktop welcome: Web RPC failed` and DSH cannot
+ * open at all. Never export `null` here; an absent schema is safe, `null` is
+ * not.
+ */
+async function loadSchema() {
+  try {
+    const mod = await import('@deepseek-ai/schemastery');
+    const schema = mod?.default ?? mod;
+    if (typeof schema?.object === 'function') return schema;
+  } catch {
+    /* fall through to the profile anchor */
+  }
+  try {
+    const profileDir = process.env.DSH_PROFILE_DIR;
+    if (profileDir) {
+      const loaded = createRequire(path.join(profileDir, 'package.json'))('@deepseek-ai/schemastery');
+      const schema = loaded?.default ?? loaded;
+      if (typeof schema?.object === 'function') return schema;
+    }
+  } catch {
+    /* schema-less fallback below */
+  }
+  return null;
 }
+
+const Schema = await loadSchema();
 
 export const Config = Schema ? Schema.object({
   ocrProvider: Schema.string().default('windows-ocr').description('OCR 来源：windows-ocr（默认）、tesseract 或 command'),
@@ -31,7 +61,7 @@ export const Config = Schema ? Schema.object({
   asrArgs: Schema.array(Schema.string()).default([]).description('转写参数模板，支持 {file} 与 {language}'),
   timeoutMs: Schema.natural().default(120000).description('单次提取超时毫秒'),
   maxChars: Schema.natural().default(20000).description('返回文本上限'),
-}) : null;
+}) : undefined;
 
 const TEXT_OUTPUT = Object.freeze({
   schema: {
@@ -62,38 +92,38 @@ export function apply(ctx, config = {}) {
       if (typeof disposeService === 'function') disposers.push(disposeService);
     }
     const disposeTool = ctx.tools.register({
-    name: 'cortex_extract_text',
-    description: 'Extract text from a local file:// input with an explicitly configured OCR/ASR command. Optionally ingest the text as a derived memory when traceId is provided. Never downloads a model.',
-    parameters: {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        uri: { type: 'string', description: 'Local file:// URI' },
-        mode: { type: 'string', enum: ['ocr', 'asr'], description: 'OCR for images, ASR for audio' },
-        language: { type: 'string', description: 'Optional language hint passed as {language}' },
-        traceId: { type: 'string', description: 'Optional target cortex trace; when set, the extracted text is stored as a derived memory' },
+      name: 'cortex_extract_text',
+      description: 'Extract text from a local file:// input with an explicitly configured OCR/ASR command. Optionally ingest the text as a derived memory when traceId is provided. Never downloads a model.',
+      parameters: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          uri: { type: 'string', description: 'Local file:// URI' },
+          mode: { type: 'string', enum: ['ocr', 'asr'], description: 'OCR for images, ASR for audio' },
+          language: { type: 'string', description: 'Optional language hint passed as {language}' },
+          traceId: { type: 'string', description: 'Optional target cortex trace; when set, the extracted text is stored as a derived memory' },
+        },
+        required: ['uri', 'mode'],
       },
-      required: ['uri', 'mode'],
-    },
-    output: TEXT_OUTPUT,
-    async execute(args) {
-      const extracted = await runExtractor(args, config);
-      const traceId = String(args?.traceId ?? '').trim();
-      if (!traceId) return extracted;
-      const cortex = ctx.get?.('cortex');
-      if (!cortex || typeof cortex.ingestExtractedText !== 'function') {
-        throw new Error('cortex service is unavailable; run without traceId or enable dsh-cortex');
-      }
-      const ingested = cortex.ingestExtractedText({
-        targetTraceId: traceId,
-        text: extracted.text,
-        uri: args.uri,
-        mode: args.mode,
-        engine: config?.ocrProvider || config?.asrProvider || 'command',
-      });
-      return { ...extracted, targetTraceId: ingested.targetTraceId, extractedTraceId: ingested.extractedTraceId };
-    },
-  });
+      output: TEXT_OUTPUT,
+      async execute(args) {
+        const extracted = await runExtractor(args, config);
+        const traceId = String(args?.traceId ?? '').trim();
+        if (!traceId) return extracted;
+        const cortex = ctx.get?.('cortex');
+        if (!cortex || typeof cortex.ingestExtractedText !== 'function') {
+          throw new Error('cortex service is unavailable; run without traceId or enable dsh-cortex');
+        }
+        const ingested = cortex.ingestExtractedText({
+          targetTraceId: traceId,
+          text: extracted.text,
+          uri: args.uri,
+          mode: args.mode,
+          engine: config?.ocrProvider || config?.asrProvider || 'command',
+        });
+        return { ...extracted, targetTraceId: ingested.targetTraceId, extractedTraceId: ingested.extractedTraceId };
+      },
+    });
     if (typeof disposeTool === 'function') disposers.push(disposeTool);
     return () => { for (const dispose of disposers.reverse()) { try { dispose?.(); } catch { /* quiet */ } } };
   }, 'cortex-extractors');

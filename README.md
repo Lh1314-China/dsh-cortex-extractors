@@ -7,6 +7,14 @@ Optional OCR/ASR adapter for cortex. It is a **separate bundle**, not part of `d
 - Accepts only `file://` inputs.
 - Fails closed when no command is configured.
 
+> **Use 0.2.1 or newer.** Releases 0.1.8 / 0.1.9 / 0.2.0 exported `Config = null` when
+> `@deepseek-ai/schemastery` could not be resolved from the plugin's own path (typical for
+> `link:` installs). The host then crashed while reading settings
+> (`Cannot use 'in' operator to search for 'toJSON' in null`), the desktop welcome RPC failed,
+> and **DSH could not start at all** (`desktop welcome: Web RPC failed`).
+> 0.2.1 resolves the schema through the running profile and falls back to `Config = undefined`
+> instead of `null`. See [CHANGELOG.md](./CHANGELOG.md).
+
 ## Install
 
 Use the Harness plugin manager with this directory, then configure:

@@ -1,6 +1,6 @@
 {
   "name": "dsh-cortex-extractors",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Optional OCR/ASR adapter for DSH cortex; calls an explicitly configured local command and never downloads a model.",
   "type": "module",
   "main": "./index.js",
@@ -15,7 +15,8 @@
     "cordis.patch.yml",
     "locale/*.json",
     "icon.svg",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.js"
@@ -39,5 +40,15 @@
   "author": {
     "name": "Lh1314-China"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis-plugin",
+    "cortex",
+    "ocr",
+    "asr",
+    "whisper"
+  ]
 }
