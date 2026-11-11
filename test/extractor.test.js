@@ -40,8 +40,29 @@ test('whisper provider fails closed without a model', async () => {
   writeFileSync(file, 'fake audio');
   try {
     await assert.rejects(
-      () => runExtractor({ uri: pathToFileURL(file).href, mode: 'asr' }, { asrProvider: 'whisper-cpp' }),
+      () => runExtractor({ uri: pathToFileURL(file).href, mode: 'asr' }, {
+        asrProvider: 'whisper-cpp',
+        whisperModel: path.join(os.tmpdir(), 'definitely-missing-cortex-whisper.bin'),
+      }),
       /whisperModel/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('paddleocr provider fails closed without an explicit local model directory', async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'cortex-paddle-'));
+  const file = path.join(dir, 'page.png');
+  writeFileSync(file, 'fake image');
+  try {
+    await assert.rejects(
+      () => runExtractor({ uri: pathToFileURL(file).href, mode: 'ocr', layout: 'handwriting' }, {
+        ocrProvider: 'paddleocr',
+        paddleocrPython: 'python',
+        paddleocrModelDir: '',
+      }),
+      /paddleocrModelDir/,
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });

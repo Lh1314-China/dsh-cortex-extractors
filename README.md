@@ -28,7 +28,27 @@ ocrProvider: tesseract
 tesseractLanguage: chi_sim+eng
 tesseractPath: 'C:/Program Files/Tesseract-OCR/tesseract.exe'
 tessdataPath: 'C:/Users/<you>/AppData/Local/cortex-extractors/tessdata'
+ocrLayout: auto            # auto / single / two-column / handwriting
 ```
+
+`two-column` reads Tesseract TSV coordinates and emits the left column before the right;
+`auto` only chooses it when two populated columns are separated by a gutter. `single` keeps
+plain top-to-bottom order. `handwriting` switches Tesseract to page mode 6.
+
+### Optional PaddleOCR layout/handwriting bridge
+
+For real layout or handwriting models, install `paddleocr` + `paddlepaddle` yourself and point
+the plugin at a **local model directory**. The bridge refuses to run when the directory is
+missing; DSH never downloads a model implicitly.
+
+```yaml
+ocrProvider: paddleocr
+paddleocrPython: 'python'
+paddleocrModelDir: 'C:/models/paddleocr'
+ocrLayout: handwriting     # or auto / two-column
+```
+
+The optional bridge is `lib/paddleocr_bridge.py`. It is not executed by the default install.
 
 Whisper.cpp is available as an explicit ASR provider; the model file must be placed manually:
 

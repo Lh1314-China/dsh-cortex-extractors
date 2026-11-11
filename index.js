@@ -42,8 +42,11 @@ async function loadSchema() {
 const Schema = await loadSchema();
 
 export const Config = Schema ? Schema.object({
-  ocrProvider: Schema.string().default('windows-ocr').description('OCR 来源：windows-ocr（默认）、tesseract 或 command'),
+  ocrProvider: Schema.string().default('windows-ocr').description('OCR 来源：windows-ocr（默认）、tesseract、paddleocr 或 command'),
   ocrLanguage: Schema.string().default('zh-Hans').description('Windows OCR 语言标签'),
+  ocrLayout: Schema.string().default('auto').description('OCR 版面顺序：auto、single、two-column 或 handwriting'),
+  paddleocrPython: Schema.string().default('python').description('可选的本地 PaddleOCR 桥 Python 可执行文件'),
+  paddleocrModelDir: Schema.string().default('').description('PaddleOCR 本地模型目录；paddleocr 源必填，不会自动下载'),
   ocrPreprocess: Schema.boolean().default(true).description('Windows OCR 前先高分辨率上采样（失败回退原图）'),
   tesseractPath: Schema.string().default('').description('Tesseract 可执行文件；留空自动找常见安装路径'),
   tesseractLanguage: Schema.string().default('chi_sim+eng').description('Tesseract 语言，例如 chi_sim+eng'),
@@ -87,7 +90,7 @@ export function apply(ctx, config = {}) {
     if (typeof ctx.provide === 'function') {
       const disposeService = ctx.provide('cortexExtractor', {
         extract: (args) => runExtractor(args, config),
-        config: () => ({ ocrProvider: config.ocrProvider ?? 'windows-ocr', asrProvider: config.asrProvider ?? 'command' }),
+        config: () => ({ ocrProvider: config.ocrProvider ?? 'windows-ocr', asrProvider: config.asrProvider ?? 'command', ocrLayout: config.ocrLayout ?? 'auto' }),
       });
       if (typeof disposeService === 'function') disposers.push(disposeService);
     }
@@ -101,13 +104,14 @@ export function apply(ctx, config = {}) {
           uri: { type: 'string', description: 'Local file:// URI' },
           mode: { type: 'string', enum: ['ocr', 'asr'], description: 'OCR for images, ASR for audio' },
           language: { type: 'string', description: 'Optional language hint passed as {language}' },
+          layout: { type: 'string', enum: ['auto', 'single', 'two-column', 'handwriting'], description: 'Reading order: auto, single column, two columns, or handwriting mode' },
           traceId: { type: 'string', description: 'Optional target cortex trace; when set, the extracted text is stored as a derived memory' },
         },
         required: ['uri', 'mode'],
       },
       output: TEXT_OUTPUT,
       async execute(args) {
-        const extracted = await runExtractor(args, config);
+        const extracted = await runExtractor({ ...args, layout: args?.layout }, config);
         const traceId = String(args?.traceId ?? '').trim();
         if (!traceId) return extracted;
         const cortex = ctx.get?.('cortex');

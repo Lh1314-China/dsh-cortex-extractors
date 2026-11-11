@@ -41,3 +41,14 @@ npm i dsh-cortex-extractors@0.2.1
 ## 0.1.9 / 0.1.8 — 2026-11-11
 
 - 内部迭代版本，未公开文档。
+
+## 0.3.0 — 2026-11-12
+
+- Added Tesseract TSV layout ordering: `auto`, `single`, `two-column`, `handwriting`.
+- Added optional `paddleocr` provider with an explicit local model directory; fails closed without it and never downloads a model.
+- Added pure layout tests and a PaddleOCR fail-closed test.
+
+## 0.3.1 — 2026-11-12
+
+- Fixed Tesseract TSV config discovery when user tessdata has no configs directory.
+- Split same-line left/right words by coordinates; place spanning headers/footers outside columns.
