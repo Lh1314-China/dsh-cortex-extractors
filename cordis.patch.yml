@@ -1,0 +1,4 @@
+- insert:
+    - id: cortex-extractors
+      name: dsh-cortex-extractors
+      config: {}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Cortex external extractors",
+    "description": "Optional OCR/ASR adapter that calls only an explicitly configured local command and never downloads models."
+  }
+}

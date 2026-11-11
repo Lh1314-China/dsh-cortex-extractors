@@ -1,0 +1,43 @@
+{
+  "name": "dsh-cortex-extractors",
+  "version": "0.2.0",
+  "description": "Optional OCR/ASR adapter for DSH cortex; calls an explicitly configured local command and never downloads a model.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lh1314-China/dsh-cortex-extractors.git"
+  },
+  "homepage": "https://github.com/Lh1314-China/dsh-cortex-extractors#readme",
+  "bugs": {
+    "url": "https://github.com/Lh1314-China/dsh-cortex-extractors/issues"
+  },
+  "author": {
+    "name": "Lh1314-China"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Cortex 外部提取器",
+    "description": "可选 OCR/ASR 适配器：只调用你显式配置的本地命令，不自动下载模型。"
+  }
+}
