@@ -21,6 +21,10 @@ Use the Harness plugin manager with this directory, then configure:
 
 Windows OCR is the default OCR provider; no model is downloaded. It upscales small images (up to 1600px wide) before recognition and falls back to the original image on preprocessing failure. Disable with `ocrPreprocess: false`.
 
+Windows OCR now also returns word bounding boxes and honors `ocrLayout` / the UI Layout selector:
+`auto` detects two columns, `two-column` splits words at the page midpoint, and full-width
+footers/headers stay whole. `single` and `handwriting` keep top-to-bottom order.
+
 Tesseract is available as an explicit provider (it is not the default):
 
 ```yaml
@@ -38,17 +42,23 @@ plain top-to-bottom order. `handwriting` switches Tesseract to page mode 6.
 ### Optional PaddleOCR layout/handwriting bridge
 
 For real layout or handwriting models, install `paddleocr` + `paddlepaddle` yourself and point
-the plugin at a **local model directory**. The bridge refuses to run when the directory is
-missing; DSH never downloads a model implicitly.
+the plugin at a **local model root** containing the detection and recognition folders. The
+bridge refuses to run when the folders are missing; DSH never downloads a model implicitly.
 
 ```yaml
 ocrProvider: paddleocr
 paddleocrPython: 'python'
-paddleocrModelDir: 'C:/models/paddleocr'
+paddleocrModelDir: 'C:/Users/<you>/.paddlex/official_models'
 ocrLayout: handwriting     # or auto / two-column
 ```
 
-The optional bridge is `lib/paddleocr_bridge.py`. It is not executed by the default install.
+The root should contain e.g. `PP-OCRv6_medium_det` and `PP-OCRv6_medium_rec` (or a supported
+v5/v4 pair). The bridge uses CPU with oneDNN disabled for compatibility. The optional bridge is
+`lib/paddleocr_bridge.py`; it is not executed by the default install.
+
+Acceptance on this machine: synthetic KaiTi handwriting-style image produced
+`手写测试 / 本鲸喜欢白饭 / 今天也要好好学技术` with the real PaddleOCR model. This is not a
+human-handwriting benchmark.
 
 Whisper.cpp is available as an explicit ASR provider; the model file must be placed manually:
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeLayout, orderBlocks, parseTesseractTsv } from '../lib/layout.js';
+import { normalizeLayout, orderBlocks, orderWordBlocks, parseTesseractTsv } from '../lib/layout.js';
 
 test('Tesseract TSV becomes line blocks with stable coordinates', () => {
   const tsv = [
@@ -31,6 +31,17 @@ test('same Tesseract line is split by word coordinates before ordering', () => {
   ].join('\n');
   const text = orderBlocks(parseTesseractTsv(tsv, { splitColumns: true }), 'two-column');
   assert.deepEqual(text.split('\n'), ['LEFT ONE', 'LEFT TWO', 'RIGHT ONE', 'RIGHT TWO', 'FOOTER']);
+});
+
+test('Windows OCR word boxes split the same line at the midpoint', () => {
+  const text = orderWordBlocks([
+    { text: 'LEFT', x: 20, y: 10, width: 80, height: 20, line: 0, index: 0 },
+    { text: 'ONE', x: 120, y: 10, width: 60, height: 20, line: 0, index: 1 },
+    { text: 'RIGHT', x: 520, y: 10, width: 90, height: 20, line: 0, index: 2 },
+    { text: 'ONE', x: 630, y: 10, width: 60, height: 20, line: 0, index: 3 },
+    { text: 'FOOTER', x: 20, y: 400, width: 600, height: 20, line: 1, index: 0 },
+  ], 'two-column');
+  assert.deepEqual(text.split('\n'), ['LEFT ONE', 'RIGHT ONE', 'FOOTER']);
 });
 
 test('two-column ordering puts the left column before the right', () => {

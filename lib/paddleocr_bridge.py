@@ -4,12 +4,24 @@
 This file is not executed by default. It requires:
   pip install paddleocr paddlepaddle
 
-The model directory must be provided explicitly; the bridge refuses to run
-without one so DSH never silently downloads a model at extraction time.
+The model directory must be explicit and contain the local detection and
+recognition model folders; the bridge never downloads a model at extraction
+time.
 """
 import argparse
 import json
+import os
 import sys
+from pathlib import Path
+
+# Node reads subprocess stdout as UTF-8; Windows console defaults can be GBK.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except AttributeError:
+    pass
+
+# Explicit model directories must be used; suppress the online source check.
+os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
 
 
 def box_bounds(box):
@@ -67,6 +79,24 @@ def normalize_result(result):
     return blocks
 
 
+def find_model_dirs(root):
+    root = Path(root)
+    candidates = [
+        (root / "PP-OCRv6_medium_det", root / "PP-OCRv6_medium_rec"),
+        (root / "PP-OCRv5_mobile_det", root / "PP-OCRv5_mobile_rec"),
+        (root / "PP-OCRv4_mobile_det", root / "PP-OCRv4_mobile_rec"),
+    ]
+    for det, rec in candidates:
+        if det.is_dir() and rec.is_dir():
+            return det, rec
+    # Also accept a directory that itself contains det/rec subdirectories.
+    for det in root.glob("*det*"):
+        for rec in root.glob("*rec*"):
+            if det.is_dir() and rec.is_dir():
+                return det, rec
+    return None, None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", required=True)
@@ -75,6 +105,10 @@ def main():
     parser.add_argument("--model-dir", required=True)
     args = parser.parse_args()
 
+    det_dir, rec_dir = find_model_dirs(args.model_dir)
+    if not det_dir or not rec_dir:
+        raise SystemExit("paddleocrModelDir must contain local detection and recognition model folders; no model is downloaded")
+
     try:
         from paddleocr import PaddleOCR
     except Exception as exc:  # noqa: BLE001 - the caller needs the exact reason
@@ -82,20 +116,15 @@ def main():
 
     kwargs = {
         "lang": args.language or "ch",
-        "det_model_dir": args.model_dir,
-        "rec_model_dir": args.model_dir,
-        "cls_model_dir": args.model_dir,
+        "text_detection_model_dir": str(det_dir),
+        "text_recognition_model_dir": str(rec_dir),
+        "use_doc_orientation_classify": False,
+        "use_doc_unwarping": False,
+        "use_textline_orientation": False,
+        "enable_mkldnn": False,
     }
-    try:
-        ocr = PaddleOCR(**kwargs)
-    except TypeError:
-        # Some PaddleOCR versions use model_dir instead of per-model dirs.
-        ocr = PaddleOCR(lang=args.language or "ch", model_dir=args.model_dir)
-
-    try:
-        result = ocr.predict(args.file)
-    except AttributeError:
-        result = ocr.ocr(args.file, cls=True)
+    ocr = PaddleOCR(**kwargs)
+    result = ocr.predict(args.file)
     blocks = normalize_result(result)
     if not blocks:
         raise SystemExit("paddleocr returned no text blocks")

@@ -52,3 +52,12 @@ npm i dsh-cortex-extractors@0.2.1
 
 - Fixed Tesseract TSV config discovery when user tessdata has no configs directory.
 - Split same-line left/right words by coordinates; place spanning headers/footers outside columns.
+
+## 0.3.2 — 2026-11-12
+
+- Windows OCR now emits word bounding boxes and honors the layout selector (`auto`/`single`/`two-column`/`handwriting`).
+- Same-line left/right words are split by page midpoint; full-width footers/headers stay whole.
+- UI full extraction with layout was verified on Windows OCR and Tesseract.
+
+- PaddleOCR bridge now accepts a local model root with detection/recognition folders, disables oneDNN for CPU compatibility, and writes UTF-8 JSON.
+- Local acceptance: KaiTi handwriting-style image -> 手写测试 / 本鲸喜欢白饭 / 今天也要好好学技术.

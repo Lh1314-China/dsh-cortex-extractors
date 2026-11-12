@@ -1,7 +1,9 @@
 param(
   [Parameter(Mandatory = $true)][string]$Path,
   [string]$Language = 'zh-Hans',
-  [switch]$Preprocess
+  [string]$Layout = 'auto',
+  [switch]$Preprocess,
+  [switch]$AsJson
 )
 
 $ErrorActionPreference = 'Stop'
@@ -85,7 +87,30 @@ if (-not $engine) {
 }
 
 $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
-$result.Text
+if ($AsJson) {
+  $words = @()
+  $lineIndex = 0
+  foreach ($line in $result.Lines) {
+    $wordIndex = 0
+    foreach ($word in $line.Words) {
+      $rect = $word.BoundingRect
+      $words += [pscustomobject]@{
+        text = [string]$word.Text
+        x = [double]$rect.X
+        y = [double]$rect.Y
+        width = [double]$rect.Width
+        height = [double]$rect.Height
+        line = $lineIndex
+        index = $wordIndex
+      }
+      $wordIndex++
+    }
+    $lineIndex++
+  }
+  [pscustomobject]@{ engine = 'windows-ocr'; layout = $Layout; words = $words } | ConvertTo-Json -Depth 4 -Compress
+} else {
+  $result.Text
+}
 } finally {
   if ($tempPath -and (Test-Path -LiteralPath $tempPath)) {
     Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
