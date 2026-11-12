@@ -67,3 +67,8 @@ npm i dsh-cortex-extractors@0.2.1
 - PaddleOCR bridge preprocesses transparent/large photos to RGB and limits them to 2000px.
 - Friendly failure guidance for missing OCR text, missing PaddleOCR, and invalid model directories.
 - Real cursive handwriting acceptance: a public-domain sample produced partial readable text; accuracy remains limited.
+
+## 0.3.4 — 2026-11-12
+
+- Declared `engines.dsh` in package.json so the bundle can be listed by a DSH market index.
+- No extractor behavior change.
