@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 # Node reads subprocess stdout as UTF-8; Windows console defaults can be GBK.
@@ -114,6 +115,23 @@ def main():
     except Exception as exc:  # noqa: BLE001 - the caller needs the exact reason
         raise SystemExit(f"paddleocr is not installed: {exc}")
 
+    # Large photos and transparent PNGs sometimes make CCCD/PP detection return
+    # nothing. Normalize to a small RGB image before inference (best effort;
+    # Pillow is already a PaddleOCR dependency).
+    prepared = args.file
+    try:
+        from PIL import Image, ImageOps
+        image = Image.open(args.file)
+        image = image.convert("RGB")
+        image = ImageOps.grayscale(image).convert("RGB")
+        image.thumbnail((2000, 2000))
+        handle = tempfile.NamedTemporaryFile(prefix="cortex-paddle-", suffix=".png", delete=False)
+        handle.close()
+        image.save(handle.name)
+        prepared = handle.name
+    except Exception:
+        prepared = args.file
+
     kwargs = {
         "lang": args.language or "ch",
         "text_detection_model_dir": str(det_dir),
@@ -123,11 +141,18 @@ def main():
         "use_textline_orientation": False,
         "enable_mkldnn": False,
     }
-    ocr = PaddleOCR(**kwargs)
-    result = ocr.predict(args.file)
-    blocks = normalize_result(result)
+    try:
+        ocr = PaddleOCR(**kwargs)
+        result = ocr.predict(prepared)
+        blocks = normalize_result(result)
+    finally:
+        if prepared != args.file:
+            try:
+                os.unlink(prepared)
+            except OSError:
+                pass
     if not blocks:
-        raise SystemExit("paddleocr returned no text blocks")
+        raise SystemExit("paddleocr returned no text blocks; use a clearer image or a different layout/engine")
     print(json.dumps({"engine": "paddleocr", "layout": args.layout, "blocks": blocks}, ensure_ascii=False))
 
 

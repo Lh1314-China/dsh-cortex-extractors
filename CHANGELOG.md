@@ -61,3 +61,9 @@ npm i dsh-cortex-extractors@0.2.1
 
 - PaddleOCR bridge now accepts a local model root with detection/recognition folders, disables oneDNN for CPU compatibility, and writes UTF-8 JSON.
 - Local acceptance: KaiTi handwriting-style image -> 手写测试 / 本鲸喜欢白饭 / 今天也要好好学技术.
+
+## 0.3.3 — 2026-11-12
+
+- PaddleOCR bridge preprocesses transparent/large photos to RGB and limits them to 2000px.
+- Friendly failure guidance for missing OCR text, missing PaddleOCR, and invalid model directories.
+- Real cursive handwriting acceptance: a public-domain sample produced partial readable text; accuracy remains limited.

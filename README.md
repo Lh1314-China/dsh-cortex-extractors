@@ -114,3 +114,8 @@ The test uses a fake engine; it does not download or run a real OCR/ASR model.
 - No HTTP input.
 - No main-cortex dependency.
 - Text extraction quality depends on the configured engine.
+
+## Engines and layout
+
+See [docs/engines.md](./docs/engines.md) for providers, model directories, layout behavior and failure modes.
+
