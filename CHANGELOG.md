@@ -1,3 +1,8 @@
+## 0.3.5 — 2026-11-13
+
+- Ship the extractor tests in the npm tarball (`test/` added to `files`), so `npm test` works after install.
+- Keep layout, TSV ordering, protocol validation, empty-text and derived-link tests beside the published package.
+- No runtime behavior change from 0.3.4.
 # Changelog
 
 ## 0.2.1 — 2026-11-11
@@ -72,3 +77,4 @@ npm i dsh-cortex-extractors@0.2.1
 
 - Declared `engines.dsh` in package.json so the bundle can be listed by a DSH market index.
 - No extractor behavior change.
+
