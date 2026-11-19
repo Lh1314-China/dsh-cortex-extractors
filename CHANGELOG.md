@@ -1,9 +1,16 @@
+# Changelog
+
+## 0.3.6 — 2026-11-19
+
+- Neutralize the example prompts and acceptance samples (no personal names or foods).
+- Align `engines.dsh` with dsh-cortex (`>=0.2.1-rc.2 <0.5.0`).
+- No runtime behavior change from 0.3.5.
+
 ## 0.3.5 — 2026-11-13
 
 - Ship the extractor tests in the npm tarball (`test/` added to `files`), so `npm test` works after install.
 - Keep layout, TSV ordering, protocol validation, empty-text and derived-link tests beside the published package.
 - No runtime behavior change from 0.3.4.
-# Changelog
 
 ## 0.2.1 — 2026-11-11
 
@@ -65,7 +72,7 @@ npm i dsh-cortex-extractors@0.2.1
 - UI full extraction with layout was verified on Windows OCR and Tesseract.
 
 - PaddleOCR bridge now accepts a local model root with detection/recognition folders, disables oneDNN for CPU compatibility, and writes UTF-8 JSON.
-- Local acceptance: KaiTi handwriting-style image -> 手写测试 / 本鲸喜欢白饭 / 今天也要好好学技术.
+- Local acceptance: KaiTi handwriting-style image -> 手写测试 / 用户喜欢米饭 / 今天也要好好学技术.
 
 ## 0.3.3 — 2026-11-12
 

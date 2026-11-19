@@ -1,6 +1,6 @@
 {
   "name": "dsh-cortex-extractors",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Optional OCR/ASR adapter for DSH cortex with layout-aware extraction, an optional local PaddleOCR bridge, and explicit local-command providers; never downloads a model.",
   "type": "module",
   "main": "./index.js",
@@ -31,7 +31,7 @@
   },
   "engines": {
     "node": ">=24",
-    "dsh": ">=0.2.1-rc.2 <0.4.0"
+    "dsh": ">=0.2.1-rc.2 <0.5.0"
   },
   "repository": {
     "type": "git",

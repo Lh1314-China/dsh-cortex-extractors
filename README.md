@@ -56,8 +56,8 @@ The root should contain e.g. `PP-OCRv6_medium_det` and `PP-OCRv6_medium_rec` (or
 v5/v4 pair). The bridge uses CPU with oneDNN disabled for compatibility. The optional bridge is
 `lib/paddleocr_bridge.py`; it is not executed by the default install.
 
-Acceptance on this machine: synthetic KaiTi handwriting-style image produced
-`手写测试 / 本鲸喜欢白饭 / 今天也要好好学技术` with the real PaddleOCR model. This is not a
+Acceptance run: synthetic KaiTi handwriting-style image produced
+`手写测试 / 用户喜欢米饭 / 今天也要好好学技术` with the real PaddleOCR model. This is not a
 human-handwriting benchmark.
 
 Whisper.cpp is available as an explicit ASR provider; the model file must be placed manually:
@@ -67,8 +67,8 @@ asrProvider: whisper-cpp
 whisperPath: 'C:/tools/whisper/whisper-cli.exe'
 whisperModel: 'C:/models/ggml-small.bin'
 whisperLanguage: zh
-whisperPrompt: '本鲸 白饭 主人'
-asrReplacements: ['本金=本鲸']
+whisperPrompt: '助手 米饭 用户'
+asrReplacements: ['图形=图像']
 # Optional: output temp directory; defaults to <cwd>/.cortex-extractors-tmp
 tmpDir: 'C:/path/to/writable/tmp'
 ```
