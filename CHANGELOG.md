@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.7 — 2026-11-20
+
+- 新增 `scripts/check-env.ps1`：一条命令报告本机已有哪些引擎（Windows OCR、Tesseract、
+  whisper.cpp、PaddleOCR），只读、不下载、不改配置。
+- 不改变运行行为：Windows OCR 仍是默认路径，其它引擎依旧是可选项。
+
 ## 0.3.6 — 2026-11-19
 
 - Neutralize the example prompts and acceptance samples (no personal names or foods).

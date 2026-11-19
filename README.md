@@ -115,6 +115,21 @@ The test uses a fake engine; it does not download or run a real OCR/ASR model.
 - No main-cortex dependency.
 - Text extraction quality depends on the configured engine.
 
+## Check your engines
+
+```powershell
+.\scripts\check-env.ps1
+```
+
+Prints which engines this machine already has: the Windows OCR recognizer
+languages, Tesseract, whisper.cpp and PaddleOCR. It never downloads anything and
+never changes configuration.
+
+Windows OCR is the default provider and needs no install. Tesseract, whisper.cpp
+and PaddleOCR are optional; this package does not bundle them and has no silent
+installer for them — use their official distribution (see the links the script
+prints).
+
 ## Engines and layout
 
 See [docs/engines.md](./docs/engines.md) for providers, model directories, layout behavior and failure modes.
