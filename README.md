@@ -119,3 +119,15 @@ The test uses a fake engine; it does not download or run a real OCR/ASR model.
 
 See [docs/engines.md](./docs/engines.md) for providers, model directories, layout behavior and failure modes.
 
+## Requirements
+
+- Node `>=24` and DSH `>=0.2.1-rc.2 <0.5.0` (see `engines` and `dsh.compatibility`).
+- One engine configured explicitly: Windows OCR (built in), Tesseract, PaddleOCR, whisper.cpp,
+  or a custom command. Optional engines and models are yours to install; nothing is downloaded
+  implicitly.
+- Inputs must be `file://` URIs; HTTP input is not accepted.
+
+## License
+
+MIT. See [LICENSE](./LICENSE).
+
